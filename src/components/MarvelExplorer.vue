@@ -1,13 +1,22 @@
 <template>
   <div class="container">
+    <a name="top" class="anchor-link position-absolute"></a>
     <p>An infinite list of superb comics &#129322;</p>
     <div v-show="sorted" class="row">
-      <div class="col-6 col-md-3" v-for="(item, index) in data" :key="index">
-        <img class="img-fluid" :src="item.image" />
+      <div class="d-flex col-12 col-sm-6 col-lg-3 flex-column" v-for="(item, index) in data" :key="index">
+        <div class="image-area flex-grow-1">
+          <img class="img" :src="item.image" />
+          <p class="price m-0" v-html="item.price"></p>
+        </div>
+        <div class="details-area">
+          <p class="issue-number small m-0 text-right">Issue:&nbsp;{{item.issueNumber}}</p>
+          <p class="text-left">{{item.title}}</p>
+        </div>
       </div>
-      <div ref="infiniteScrollTrigger" id="scroll-trigger"></div>
+      <div ref="infiniteScrollTrigger"></div>
       <div class="loader" v-if="showLoader"></div>
     </div>
+    <a href="#top" type="button" class="btn btn-secondary fixed-bottom m-4 btn-top">Top</a>
   </div>
 </template>
 <script>
@@ -16,11 +25,13 @@ export default {
   name: "MarvelExplorer",
   data() {
     return {
-      url: "https://gateway.marvel.com/v1/public/comics?apikey=",
+      api: {
+        url: "https://gateway.marvel.com/v1/public/comics",
+        offset: 0
+      },
       data: [],
-      // currentPage: 1,
-      // totalPages: 4,
-      showLoader: false
+      showLoader: false,
+      showBtnTop: true
     };
   },
   created: function() {
@@ -28,22 +39,27 @@ export default {
   },
   mounted() {
     this.scrollTrigger();
-    this.showLoader = false;
   },
   computed: {
     sorted: function() {
+      this.showLoader = false;
       return this.data.length > 0;
-    },
-    // pageCount() {
-    //   return this.totalPages - this.currentPage;
-    // }
+    }
   },
   methods: {
     fetchComics: function() {
-      fetch(this.url + process.env.VUE_APP_API_KEY, {
-        method: "GET"
-      })
+      fetch(
+        this.api.url +
+          "?offset=" +
+          this.api.offset +
+          "&apikey=" +
+          process.env.VUE_APP_API_KEY,
+        {
+          method: "GET"
+        }
+      )
         .then(response => {
+          this.api.offset += 20;
           return response.json();
         })
         .then(responseJson => {
@@ -52,7 +68,10 @@ export default {
               image: item.thumbnail.path + "." + item.thumbnail.extension,
               title: item.title,
               issueNumber: item.issueNumber,
-              price: item.prices.price
+              price:
+                item.prices[0].price == 0
+                  ? "Sold Out"
+                  : item.prices[0].price + "&nbsp;&euro;"
             });
           });
           console.log(this.data);
@@ -68,24 +87,54 @@ export default {
           if (entry.intersectionRatio > 0) {
             this.showLoader = true;
             this.fetchComics();
-            this.currentPage += 1;
           }
         });
       });
-      observer.observe(this.$refs.infiniteScrollTrigger);
+      // Lets give some time for the first render
+      setTimeout(() => {
+        observer.observe(this.$refs.infiniteScrollTrigger);
+      }, 2000);
     }
   }
 };
 /* eslint-enable */
 </script>
 <style lang="css" scoped>
+.anchor-link {
+  top: 0;
+}
+.btn-top {
+  left: auto;
+}
+.image-area {
+  position: relative;
+  display: inline-block;
+  margin-bottom: 5px;
+  box-shadow: 0 10px 20px -10px rgba(0, 0, 0, 0.7);
+}
+.image-area .img {
+  object-fit: cover;
+  height: 100%;
+  width: 100%;
+}
+.image-area .price {
+  position: absolute;
+  bottom: 10px;
+  left: -10px;
+  padding: 7px 10px;
+  background-color: #eee;
+  box-shadow: 5px 5px 10px -5px rgba(0, 0, 0, 0.7);
+}
+.details-area {
+  flex-basis: 140px;
+}
 .loader {
   margin: auto;
   margin-top: 50px;
   width: 50px;
   height: 50px;
   border-radius: 50%;
-  border: 5px solid rgba(125, 125, 125, 0.7);
+  border: 5px solid #6c757d;
   border-top: 5px solid #eee;
   animation: animate 1s infinite linear;
 }
