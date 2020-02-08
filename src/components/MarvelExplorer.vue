@@ -4,8 +4,8 @@
     <p>An infinite list of superb comics &#129322;</p>
     <div v-show="sorted" class="row">
       <div class="d-flex col-12 col-sm-6 col-lg-3 flex-column" v-for="(item, index) in data" :key="index">
-        <div class="image-area flex-grow-1">
-          <img class="img" :src="item.image" />
+        <div class="image-area">
+          <img class="img" :src="item.image" :alt="'Image of ' + item.title"/>
           <p class="price m-0" v-html="item.price"></p>
         </div>
         <div class="details-area">
@@ -105,19 +105,25 @@ export default {
 }
 .image-area {
   position: relative;
-  display: inline-block;
+  /* Aspect-ratio that all images will respect */
+  padding-top: 155%;
   margin-bottom: 5px;
   box-shadow: 0 10px 20px -10px rgba(0, 0, 0, 0.7);
+  overflow: hidden;
 }
 .image-area .img {
-  object-fit: cover;
-  height: 100%;
-  width: 100%;
+  position: absolute;
+  display: block;
+  max-height: 100%;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
 }
 .image-area .price {
   position: absolute;
   bottom: 10px;
-  left: -10px;
+  left: 10px;
   padding: 7px 10px;
   background-color: #eee;
   box-shadow: 5px 5px 10px -5px rgba(0, 0, 0, 0.7);
