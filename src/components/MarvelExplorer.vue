@@ -20,6 +20,7 @@
   </div>
 </template>
 <script>
+/* Disable eslint enabling us to console.log() and to easier debug/review */
 /* eslint-disable */
 export default {
   name: "MarvelExplorer",
@@ -34,11 +35,8 @@ export default {
       showBtnTop: true
     };
   },
-  created: function() {
-    this.fetchComics();
-  },
   mounted() {
-    this.scrollTrigger();
+    this.fetchComics().then(this.scrollTrigger());
   },
   computed: {
     sorted: function() {
@@ -48,37 +46,39 @@ export default {
   },
   methods: {
     fetchComics: function() {
-      fetch(
-        this.api.url +
-          "?offset=" +
-          this.api.offset +
-          "&apikey=" +
-          process.env.VUE_APP_API_KEY,
-        {
-          method: "GET"
-        }
-      )
-        .then(response => {
-          this.api.offset += 20;
-          return response.json();
-        })
-        .then(responseJson => {
-          responseJson.data.results.forEach(item => {
-            this.data.push({
-              image: item.thumbnail.path + "." + item.thumbnail.extension,
-              title: item.title,
-              issueNumber: item.issueNumber,
-              price:
-                item.prices[0].price == 0
-                  ? "Sold Out"
-                  : item.prices[0].price + "&nbsp;&euro;"
+      return new Promise((resolve, reject) => {
+        fetch(
+          this.api.url +
+            "?offset=" +
+            this.api.offset +
+            "&apikey=" +
+            process.env.VUE_APP_API_KEY,
+          {
+            method: "GET"
+          }
+        )
+          .then(response => {
+            this.api.offset += 20;
+            return response.json();
+          })
+          .then(responseJson => {
+            responseJson.data.results.forEach(item => {
+              this.data.push({
+                image: item.thumbnail.path + "." + item.thumbnail.extension,
+                title: item.title,
+                issueNumber: item.issueNumber,
+                price:
+                  item.prices[0].price == 0
+                    ? "Sold Out"
+                    : item.prices[0].price + "&nbsp;&euro;"
+              });
             });
+            console.log(this.data);
+          })
+          .catch(error => {
+            console.error("Error:", error);
           });
-          console.log(this.data);
-        })
-        .catch(error => {
-          console.error("Error:", error);
-        });
+      });
     },
 
     scrollTrigger() {
@@ -90,10 +90,7 @@ export default {
           }
         });
       });
-      // Lets give some time for the first render
-      setTimeout(() => {
         observer.observe(this.$refs.infiniteScrollTrigger);
-      }, 2000);
     }
   }
 };
