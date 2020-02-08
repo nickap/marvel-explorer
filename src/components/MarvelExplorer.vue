@@ -1,22 +1,22 @@
 <template>
   <div class="container">
-    <a name="top" class="anchor-link position-absolute"></a>
+    <a name="top" class="anchor-link"></a>
     <p>An infinite list of superb comics &#129322;</p>
     <div v-show="sorted" class="row">
-      <div class="d-flex col-12 col-sm-6 col-lg-3 flex-column" v-for="(item, index) in data" :key="index">
+      <div class="d-flex flex-column col-12 col-sm-6 col-lg-3" v-for="(item, index) in data" :key="index">
         <div class="image-area">
           <img class="img" :src="item.image" :alt="'Image of ' + item.title"/>
-          <p class="price m-0" v-html="item.price"></p>
+          <p class="price" v-html="item.price"></p>
         </div>
-        <div class="details-area">
-          <p class="issue-number small m-0 text-right">Issue:&nbsp;{{item.issueNumber}}</p>
+        <div class="details-area mb-2">
+          <p class="text-right m-0 small">Issue:&nbsp;{{item.issueNumber}}</p>
           <p class="text-left">{{item.title}}</p>
         </div>
       </div>
       <div ref="infiniteScrollTrigger"></div>
       <div class="loader" v-if="showLoader"></div>
     </div>
-    <a href="#top" type="button" class="btn btn-secondary fixed-bottom m-4 btn-top">Top</a>
+    <a href="#top" type="button" class="btn btn-secondary fixed-bottom mb-4 mr-5 btn-to-top">Top</a>
   </div>
 </template>
 <script>
@@ -98,9 +98,10 @@ export default {
 </script>
 <style lang="css" scoped>
 .anchor-link {
+  position: absolute;
   top: 0;
 }
-.btn-top {
+.btn-to-top {
   left: auto;
 }
 .image-area {
@@ -114,7 +115,7 @@ export default {
 .image-area .img {
   position: absolute;
   display: block;
-  max-height: 100%;
+  height: 100%;
   left: 0;
   right: 0;
   top: 0;
@@ -125,11 +126,9 @@ export default {
   bottom: 10px;
   left: 10px;
   padding: 7px 10px;
+  margin: 0px;
   background-color: #eee;
   box-shadow: 5px 5px 10px -5px rgba(0, 0, 0, 0.7);
-}
-.details-area {
-  flex-basis: 140px;
 }
 .loader {
   margin: auto;
